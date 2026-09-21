@@ -642,13 +642,21 @@ code.inline { background: var(--code-bg); padding: 1px 6px; border-radius: 3px; 
 .spotify-embed iframe { display: block; width: 100%; border: 0; }
 .tracklist { list-style: none; margin: 0 0 30px; padding: 0; border-top: 1px solid var(--border); }
 .tracklist li {
-  display: flex; align-items: center; gap: 14px; padding: 11px 6px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 11px 6px;
   border-bottom: 1px solid var(--border);
 }
 .tracklist .tn { width: 22px; text-align: right; color: var(--fg-dim); font-family: var(--mono); font-size: 0.78rem; flex-shrink: 0; }
-.tracklist a.tt { flex: 1; color: var(--fg); text-decoration: none; }
-.tracklist a.tt:hover { color: var(--accent); }
+.tracklist button.tt {
+  flex: 1; color: var(--fg); background: none; border: 0; margin: 0; padding: 0;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.tracklist button.tt::before { content: "\25B6"; display: inline-block; margin-right: 10px; font-size: 0.7em; color: var(--accent-dim); }
+.tracklist button.tt:hover { color: var(--accent); }
+.tracklist button.tt.playing { color: var(--accent); }
+.tracklist button.tt.playing::before { content: "\25AE\25AE"; color: var(--accent); }
 .tracklist .td { color: var(--fg-dim); font-family: var(--mono); font-size: 0.78rem; flex-shrink: 0; }
+.tracklist .track-embed { flex-basis: 100%; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+.tracklist .track-embed iframe { display: block; width: 100%; border: 0; }
 .artist-link {
   display: block; text-align: center; margin: 8px 0 0; color: var(--accent-dim);
   font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; text-decoration: none;
@@ -656,3 +664,16 @@ code.inline { background: var(--code-bg); padding: 1px 6px; border-radius: 3px; 
 .artist-link:hover { color: var(--accent); }
 
 .source-note { color: var(--fg-dim); font-size: 0.78rem; }
+
+/* Discography grid */
+.discography-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 22px; margin: 0 0 30px; }
+.album-card { display: block; text-decoration: none; color: var(--fg); }
+.album-card img {
+  display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px;
+  transition: border-color .2s, transform .2s;
+}
+.album-card:hover img { border-color: var(--accent-dim); transform: translateY(-2px); }
+.album-card h3 { font-family: var(--serif); font-size: 0.95rem; margin: 0 0 4px; font-weight: 600; line-height: 1.3; }
+.album-card:hover h3 { color: var(--accent); }
+.album-card .ac-meta { display: block; color: var(--fg-dim); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
