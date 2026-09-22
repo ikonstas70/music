@@ -677,3 +677,16 @@ code.inline { background: var(--code-bg); padding: 1px 6px; border-radius: 3px; 
 .album-card h3 { font-family: var(--serif); font-size: 0.95rem; margin: 0 0 4px; font-weight: 600; line-height: 1.3; }
 .album-card:hover h3 { color: var(--accent); }
 .album-card .ac-meta { display: block; color: var(--fg-dim); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* Featured video / signature composition box */
+.feature-box {
+  border: 1px solid var(--accent-dim); border-radius: 6px; padding: 22px 26px;
+  background: var(--card); margin: 0 0 34px;
+}
+.feature-box h3 { margin-top: 0; color: var(--accent); }
+.feature-box p { color: var(--fg-dim); font-size: 0.92rem; }
+.feature-box .feature-link {
+  display: inline-block; margin-top: 10px; color: var(--accent); font-size: 0.85rem;
+  letter-spacing: 0.04em; text-decoration: none;
+}
+.feature-box .feature-link:hover { color: var(--fg); }
