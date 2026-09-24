@@ -52,7 +52,7 @@ def wrap(draw, text, font, max_width):
     return lines + [cur]
 
 
-def share_card(title, meta, cover_path, out_path):
+def share_card(title, meta, cover_path, out_path, lead=""):
     cover = Image.open(cover_path).convert("RGB")
     bg = ImageOps.fit(cover, (W, H)).filter(ImageFilter.GaussianBlur(40))
     bg = Image.blend(bg, Image.new("RGB", (W, H), BG), 0.72)
@@ -83,6 +83,13 @@ def share_card(title, meta, cover_path, out_path):
         y += int(s * 1.22)
     y += 14
     d.text((x, y), meta.upper().replace("·", "  ·  "), font=avenir(5, 20), fill=DIM)
+    if lead:                                             # release description, italic, under the details line
+        lead_font = ImageFont.truetype(GEORGIA.replace("Georgia.ttf", "Georgia Italic.ttf"), 23)
+        y += 48
+        for line in wrap(d, lead, lead_font, max_width)[:4]:
+            d.text((x, y), line, font=lead_font, fill=(214, 204, 184))
+            y += 33
+        y -= 20
 
     py = max(y + 60, H - 170)
     label, pf = "LISTEN ON SPOTIFY", avenir(2, 20)
@@ -202,10 +209,10 @@ def main():
                 desc = f"{title} — track {num} from the {r['kind']} “{r['title']}” by Ioannis Alexander Konstas. Stream on Spotify."
             if r["lead"]:
                 desc = f"{r['lead']} {title} by Ioannis Alexander Konstas — stream on Spotify."
-            share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"))
+            share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), r["lead"])
             e = html.escape
             page = PAGE.format(
-                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg", artist=ARTIST_URL,
+                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg" + ("?v=2" if r["lead"] else ""), artist=ARTIST_URL,
                 title=e(title), title_full=e(f"{title} — Ioannis Alexander Konstas"), desc=e(desc), album=e(r["title"]),
                 cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=r["notes"])
             with open(os.path.join(ROOT, "tracks", slug + ".html"), "w", encoding="utf-8") as f:
