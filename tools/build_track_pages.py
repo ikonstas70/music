@@ -83,13 +83,24 @@ def share_card(title, meta, cover_path, out_path, lead=""):
         y += int(s * 1.22)
     y += 14
     d.text((x, y), meta.upper().replace("·", "  ·  "), font=avenir(5, 20), fill=DIM)
-    if lead:                                             # release description, italic, under the details line
-        lead_font = ImageFont.truetype(GEORGIA.replace("Georgia.ttf", "Georgia Italic.ttf"), 23)
+    if lead:                                             # release/track description, italic, under the details line
+        max_lines = 5
+        for lsize in (23, 21, 19, 18, 17):                # shrink to fit rather than cut the quote off mid-sentence
+            lead_font = ImageFont.truetype(GEORGIA.replace("Georgia.ttf", "Georgia Italic.ttf"), lsize)
+            lh = int(lsize * 1.42)
+            lines = wrap(d, lead, lead_font, max_width - 24)
+            if len(lines) <= max_lines:
+                break
+        else:
+            lines = lines[:max_lines]
+            joined = " ".join(lines)
+            cut = max(joined.rfind(". "), joined.rfind("! "), joined.rfind("? "))   # back off to a full sentence
+            lines = wrap(d, joined[:cut + 1] if cut > 0 else joined, lead_font, max_width - 24)
         y += 46
         top = y
-        for line in wrap(d, lead, lead_font, max_width - 24)[:4]:
+        for line in lines:
             d.text((x + 22, y), line, font=lead_font, fill=(222, 212, 192))
-            y += 34
+            y += lh
         d.rectangle([x, top + 4, x + 1, y - 8], fill=GOLD)   # thin gold rule beside the quote
         y -= 18
 
@@ -180,11 +191,21 @@ def releases():
         cover_file = re.search(r'src="\.\./covers/([^"]+)"', page)
         cover_file = cover_file.group(1) if cover_file else None
         tracks = [(int(n), tid, html.unescape(t), dur) for n, tid, t, dur in TRACK_RE.findall(page)]
-        notes = re.search(r'\n\s*<section class="release-notes".*?</section>\n', page, re.S)      # optional "About the Release"
-        lead = re.search(r'<section class="release-notes".*?<p[^>]*>(.*?)</p>', page, re.S)
+        # optional "About the Release" / "About the Track" sections. Untagged -> applies to every
+        # track on the release. Tagged with data-track-id="<spotify id>" -> that one track only
+        # (used for a compilation where the note is about a single song, not the whole release).
+        release_notes, release_lead, notes_by_track = "", "", {}
+        for m in re.finditer(r'<section class="release-notes"([^>]*)>.*?</section>', page, re.S):
+            attrs, block = m.group(1), m.group(0)
+            lead_m = re.search(r'<p[^>]*>(.*?)</p>', block, re.S)
+            block_lead = html.unescape(re.sub(r"<[^>]+>", "", lead_m.group(1))).strip() if lead_m else ""
+            tid_m = re.search(r'data-track-id="([^"]+)"', attrs)
+            if tid_m:
+                notes_by_track[tid_m.group(1)] = (re.sub(r'\s*data-track-id="[^"]+"', "", block), block_lead)
+            else:
+                release_notes, release_lead = block, block_lead
         yield dict(slug=album_slug, title=album, kind=kind, year=year, cover_file=cover_file, tracks=tracks,
-                   notes=notes.group(0).lstrip("\n") if notes else "",
-                   lead=html.unescape(re.sub(r"<[^>]+>", "", lead.group(1))).strip() if lead else "")
+                   notes=release_notes, lead=release_lead, notes_by_track=notes_by_track)
 
 
 def main():
@@ -209,14 +230,15 @@ def main():
                 meta_html = " &middot; ".join(x for x in (f'Track {num} from the {r["kind"]} <a href="/music/albums/{r["slug"]}.html">{html.escape(r["title"])}</a>', dur, r["year"]) if x)
                 back_html = f'<a href="/music/albums/{r["slug"]}.html">&larr; The full {r["kind"]}: {html.escape(r["title"])}</a>'
                 desc = f"{title} — track {num} from the {r['kind']} “{r['title']}” by Ioannis Alexander Konstas. Stream on Spotify."
-            if r["lead"]:
-                desc = f"{r['lead']} {title} by Ioannis Alexander Konstas — stream on Spotify."
-            share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), r["lead"])
+            notes_html, lead = r["notes_by_track"].get(track_id, (r["notes"], r["lead"]))
+            if lead:
+                desc = f"{lead} {title} by Ioannis Alexander Konstas — stream on Spotify."
+            share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), lead)
             e = html.escape
             page = PAGE.format(
-                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg" + ("?v=3" if r["lead"] else ""), artist=ARTIST_URL,
+                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg" + ("?v=3" if lead else ""), artist=ARTIST_URL,
                 title=e(title), title_full=e(f"{title} — Ioannis Alexander Konstas"), desc=e(desc), album=e(r["title"]),
-                cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=r["notes"])
+                cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=notes_html)
             with open(os.path.join(ROOT, "tracks", slug + ".html"), "w", encoding="utf-8") as f:
                 f.write(page)
             built.append((slug, title, r["title"]))
