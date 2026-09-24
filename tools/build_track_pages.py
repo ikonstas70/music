@@ -155,7 +155,7 @@ PAGE = """<!DOCTYPE html>
   </header>
 
   <main>
-    <img class="album-cover" src="../covers/{cover_file}" alt="{album} cover art">
+    <img class="album-cover" src="../covers/{cover_file}" alt="{cover_alt}">
     <h1 style="text-align:center">{title}</h1>
     <p class="meta" style="text-align:center">{meta_html}</p>
 {notes_html}
@@ -233,12 +233,18 @@ def main():
             notes_html, lead = r["notes_by_track"].get(track_id, (r["notes"], r["lead"]))
             if lead:
                 desc = f"{lead} {title} by Ioannis Alexander Konstas — stream on Spotify."
-            share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), lead)
+            # a track can have its own cover art (covers/tracks/<slug>.jpg) instead of the release cover
+            track_cover_path = os.path.join(ROOT, "covers", "tracks", slug + ".jpg")
+            if os.path.exists(track_cover_path):
+                use_cover_path, use_cover_file, cover_alt = track_cover_path, f"tracks/{slug}.jpg", f"{title} cover art"
+            else:
+                use_cover_path, use_cover_file, cover_alt = cover_path, cover_file, f"{r['title']} cover art"
+            share_card(title, card_meta, use_cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), lead)
             e = html.escape
             page = PAGE.format(
                 url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg" + ("?v=3" if lead else ""), artist=ARTIST_URL,
                 title=e(title), title_full=e(f"{title} — Ioannis Alexander Konstas"), desc=e(desc), album=e(r["title"]),
-                cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=notes_html)
+                cover_file=use_cover_file, cover_alt=e(cover_alt), meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=notes_html)
             with open(os.path.join(ROOT, "tracks", slug + ".html"), "w", encoding="utf-8") as f:
                 f.write(page)
             built.append((slug, title, r["title"]))
