@@ -11,6 +11,7 @@ Then publish, and refresh Facebook's cache for a new link at
 """
 import collections
 import glob
+import hashlib
 import html
 import os
 import re
@@ -239,10 +240,12 @@ def main():
                 use_cover_path, use_cover_file, cover_alt = track_cover_path, f"tracks/{slug}.jpg", f"{title} cover art"
             else:
                 use_cover_path, use_cover_file, cover_alt = cover_path, cover_file, f"{r['title']} cover art"
-            share_card(title, card_meta, use_cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"), lead)
+            card_path = os.path.join(ROOT, "share", "tracks", slug + ".jpg")
+            share_card(title, card_meta, use_cover_path, card_path, lead)
+            img_ver = hashlib.md5(open(card_path, "rb").read()).hexdigest()[:8]   # cache-bust Facebook et al. whenever the card's bytes change
             e = html.escape
             page = PAGE.format(
-                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg" + ("?v=3" if lead else ""), artist=ARTIST_URL,
+                url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg?v={img_ver}", artist=ARTIST_URL,
                 title=e(title), title_full=e(f"{title} — Ioannis Alexander Konstas"), desc=e(desc), album=e(r["title"]),
                 cover_file=use_cover_file, cover_alt=e(cover_alt), meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=notes_html)
             with open(os.path.join(ROOT, "tracks", slug + ".html"), "w", encoding="utf-8") as f:
