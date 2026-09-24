@@ -138,7 +138,7 @@ PAGE = """<!DOCTYPE html>
     <img class="album-cover" src="../covers/{cover_file}" alt="{album} cover art">
     <h1 style="text-align:center">{title}</h1>
     <p class="meta" style="text-align:center">{meta_html}</p>
-
+{notes_html}
     <div class="spotify-embed">
       <iframe src="https://open.spotify.com/embed/track/{track_id}?utm_source=oembed" width="100%" height="352" frameborder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy" title="Spotify Embed: {title}"></iframe>
     </div>
@@ -171,7 +171,11 @@ def releases():
         cover_file = re.search(r'src="\.\./covers/([^"]+)"', page)
         cover_file = cover_file.group(1) if cover_file else None
         tracks = [(int(n), tid, html.unescape(t), dur) for n, tid, t, dur in TRACK_RE.findall(page)]
-        yield dict(slug=album_slug, title=album, kind=kind, year=year, cover_file=cover_file, tracks=tracks)
+        notes = re.search(r'\n\s*<section class="release-notes".*?</section>\n', page, re.S)      # optional "About the Release"
+        lead = re.search(r'<section class="release-notes".*?<p[^>]*>(.*?)</p>', page, re.S)
+        yield dict(slug=album_slug, title=album, kind=kind, year=year, cover_file=cover_file, tracks=tracks,
+                   notes=notes.group(0).lstrip("\n") if notes else "",
+                   lead=html.unescape(re.sub(r"<[^>]+>", "", lead.group(1))).strip() if lead else "")
 
 
 def main():
@@ -196,12 +200,14 @@ def main():
                 meta_html = " &middot; ".join(x for x in (f'Track {num} from the {r["kind"]} <a href="/music/albums/{r["slug"]}.html">{html.escape(r["title"])}</a>', dur, r["year"]) if x)
                 back_html = f'<a href="/music/albums/{r["slug"]}.html">&larr; The full {r["kind"]}: {html.escape(r["title"])}</a>'
                 desc = f"{title} — track {num} from the {r['kind']} “{r['title']}” by Ioannis Alexander Konstas. Stream on Spotify."
+            if r["lead"]:
+                desc = f"{r['lead']} {title} by Ioannis Alexander Konstas — stream on Spotify."
             share_card(title, card_meta, cover_path, os.path.join(ROOT, "share", "tracks", slug + ".jpg"))
             e = html.escape
             page = PAGE.format(
                 url=f"{SITE}/tracks/{slug}.html", img=f"{SITE}/share/tracks/{slug}.jpg", artist=ARTIST_URL,
                 title=e(title), title_full=e(f"{title} — Ioannis Alexander Konstas"), desc=e(desc), album=e(r["title"]),
-                cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html)
+                cover_file=cover_file, meta_html=meta_html, track_id=track_id, back_html=back_html, notes_html=r["notes"])
             with open(os.path.join(ROOT, "tracks", slug + ".html"), "w", encoding="utf-8") as f:
                 f.write(page)
             built.append((slug, title, r["title"]))
