@@ -72,6 +72,10 @@ L’Interfaccia Padrona - In Fondo Al Mio Nucleo Tenero (L’Interfaccia Padrona
   https://ikonstas70.github.io/music/tracks/l-interfaccia-padrona-in-fondo-al-mio-nucleo-tenero.html
 Μετά Τα Μεσάνυχτα (Μετά Τα Μεσάνυχτα)
   https://ikonstas70.github.io/music/tracks/meta-ta-mesanychta--meta-ta-mesanychta.html
+O Amore (Nome di Afrodite) (Nome di Afrodite)
+  https://ikonstas70.github.io/music/tracks/o-amore-nome-di-afrodite.html
+O Amore - Baroque Inspired (Nome di Afrodite)
+  https://ikonstas70.github.io/music/tracks/o-amore-baroque-inspired--nome-di-afrodite.html
 Between the Waves (Only Love Remains)
   https://ikonstas70.github.io/music/tracks/between-the-waves.html
 Close Enough to Stay (Only Love Remains)
@@ -201,7 +205,7 @@ Morsus - Origin (Stay True)
 Nemesis (Oblivion) (Stay True)
   https://ikonstas70.github.io/music/tracks/nemesis-oblivion.html
 O Amore (Baroque Inspired) (Stay True)
-  https://ikonstas70.github.io/music/tracks/o-amore-baroque-inspired.html
+  https://ikonstas70.github.io/music/tracks/o-amore-baroque-inspired--stay-true.html
 Remember the Future (Stay True)
   https://ikonstas70.github.io/music/tracks/remember-the-future--stay-true.html
 Restless (Stay True)
