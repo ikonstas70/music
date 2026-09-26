@@ -88,7 +88,7 @@ def index_card():
     d.text((x,140),"ORIGINAL MUSIC",font=AV(2,22),fill=GOLD); d.rectangle([x,176,x+70,178],fill=GOLD)
     d.text((x,202),"Ioannis Alexander",font=F("Georgia.ttf",50),fill=FG)
     d.text((x,264),"Konstas",font=F("Georgia.ttf",50),fill=FG)
-    d.text((x,346),"28 RELEASES  ·  154 TRACKS",font=AV(5,21),fill=DIM)
+    d.text((x,346),"29 RELEASES  ·  157 TRACKS",font=AV(5,21),fill=DIM)
     pill(d,x,400)
     d.text((x,H-72),"ikonstas70.github.io/music",font=AV(7,18),fill=(120,120,120))
     img.save(f"{OUT}/discography.jpg",quality=88,optimize=True,progressive=True)
